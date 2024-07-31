@@ -1,0 +1,72 @@
+import os
+import boto3
+import base64
+import subprocess
+import threading
+import time
+import logging
+import dotenv
+
+dotenv.load_dotenv('/app/.env')
+
+camera_url = os.getenv('RTSP_URL')
+kinesis_stream_name = os.getenv('KVS_STREAM_NAME')
+aws_region = os.getenv('AWS_REGION')
+aws_access_key = os.getenv('AWS_ACCESS_KEY_ID')
+aws_secret_key = os.getenv('AWS_SECRET_ACCESS_KEY')
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+logger.info(f"RTSP_URL: {camera_url}")
+logger.info(f"KVS_STREAM_NAME: {kinesis_stream_name}")
+logger.info(f"AWS_REGION: {aws_region}")
+logger.info(f"AWS_ACCESS_KEY_ID: {aws_access_key}")
+logger.info(f"AWS_SECRET_ACCESS_KEY: {aws_secret_key}")
+
+if not aws_region:
+    raise ValueError("AWS_REGION environment variable is not set.")
+
+kinesis_client = boto3.client('kinesisvideo',
+                              region_name=aws_region,
+                              aws_access_key_id=aws_access_key,
+                              aws_secret_access_key=aws_secret_key)
+
+def send_frame_to_kinesis(frame_data):
+    try:
+        frame_base64 = base64.b64encode(frame_data).decode('utf-8')
+        response = kinesis_client.put_media(
+            StreamName=kinesis_stream_name,
+            Payload=frame_base64,
+            ContentType='video/h264'
+        )
+        logger.info("Sent frame to Kinesis: %s", response)
+    except Exception as e:
+        logger.error("Failed to send frame to Kinesis: %s", e)
+
+def capture_frames():
+    command = [
+        'gst-launch-1.0',
+        'rtspsrc', f'location={camera_url}', 'latency=0', '!',
+        'decodebin', '!',
+        'videoconvert', '!',
+        'video/x-raw,framerate=1/1', '!',  # 1 frame per second
+        'jpegenc', '!',
+        'appsink', 'max-buffers=1', 'drop=true'
+    ]
+
+    process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+    while True:
+        frame_data = process.stdout.read()
+        if frame_data:
+            send_frame_to_kinesis(frame_data)
+        else:
+            logger.error("No frame data received from GStreamer pipeline")
+        time.sleep(1)
+
+if __name__ == "__main__":
+    logger.info("Starting frame capture and send to Kinesis")
+    capture_thread = threading.Thread(target=capture_frames)
+    capture_thread.start()
+    capture_thread.join()
