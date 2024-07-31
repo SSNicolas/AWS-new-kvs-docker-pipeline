@@ -1,8 +1,10 @@
 FROM ubuntu:20.04
 
+# Definir variáveis de ambiente para evitar prompts interativos
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=Etc/UTC
 
+# Instalar dependências
 RUN apt-get update && apt-get install -y \
     cmake \
     libssl-dev \
@@ -29,31 +31,24 @@ RUN apt-get update && apt-get install -y \
     python3 \
     python3-pip \
     pkg-config \
-    m4 \
-    openjdk-11-jdk && \
+    m4 && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
+# Instalar boto3 e outras dependências Python
 COPY requirements.txt /tmp/requirements.txt
 RUN pip3 install --no-cache-dir -r /tmp/requirements.txt && rm /tmp/requirements.txt
 
+# Copiar o arquivo .env para o contêiner
 COPY .env /app/.env
 
-RUN git clone https://github.com/awslabs/amazon-kinesis-video-streams-producer-sdk-cpp.git /opt/amazon-kinesis-video-streams-producer-sdk-cpp && \
-    cd /opt/amazon-kinesis-video-streams-producer-sdk-cpp && \
-    mkdir -p kinesis-video-native-build && \
-    cd kinesis-video-native-build && \
-    cmake .. -DBUILD_GSTREAMER_PLUGIN=ON -DBUILD_JNI=TRUE && \
-    make && \
-    make install && \
-    rm -rf /opt/amazon-kinesis-video-streams-producer-sdk-cpp
-
+# Adicionar script para captura e envio de frames
 COPY capture_send_frames.py /usr/local/bin/capture_send_frames.py
 
+# Tornar o script executável
 RUN chmod +x /usr/local/bin/capture_send_frames.py
 
-ENV GST_PLUGIN_PATH=/opt/amazon-kinesis-video-streams-producer-sdk-cpp/kinesis-video-native-build
-
+# Adicionar um usuário não root
 RUN useradd -m appuser
 USER appuser
 
-ENTRYPOINT ["python3", "/usr/local/bin/capture_send_frames.py", "-l", "-c"]
+ENTRYPOINT ["python3", "/usr/local/bin/capture_send_frames.py"]

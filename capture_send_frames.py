@@ -27,18 +27,19 @@ logger.info(f"AWS_SECRET_ACCESS_KEY: {aws_secret_key}")
 if not aws_region:
     raise ValueError("AWS_REGION environment variable is not set.")
 
-kinesis_client = boto3.client('kinesisvideo',
+kinesis_client = boto3.client('kinesis',
                               region_name=aws_region,
                               aws_access_key_id=aws_access_key,
                               aws_secret_access_key=aws_secret_key)
 
+
 def send_frame_to_kinesis(frame_data):
     try:
         frame_base64 = base64.b64encode(frame_data).decode('utf-8')
-        response = kinesis_client.put_media(
+        response = kinesis_client.put_record(
             StreamName=kinesis_stream_name,
-            Payload=frame_base64,
-            ContentType='video/h264'
+            Data=frame_base64,
+            PartitionKey='partitionkey'
         )
         logger.info("Sent frame to Kinesis: %s", response)
     except Exception as e:
