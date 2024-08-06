@@ -54,7 +54,7 @@ def capture_frames():
         'videoconvert', '!',
         'video/x-raw', '!',
         'jpegenc', '!',
-        'appsink', 'sync=false', 'max-buffers=2', 'drop=true'
+        'appsink', 'sync=false', 'max-buffers=1', 'drop=true'
     ]
 
     process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
