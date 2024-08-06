@@ -68,6 +68,7 @@ def capture_frames():
 
         frame_data = process.stdout.read()
         if frame_data:
+            logger.info(f"Received frame from GStreamer pipeline: {frame_data}")
             send_frame_to_kinesis(frame_data)
         else:
             logger.error("No frame data received from GStreamer pipeline")
