@@ -50,7 +50,7 @@ def capture_frames():
         '!', 'decodebin',
         '!', 'videoconvert',
         '!', 'h264parse',
-        '!', 'rtph264depay ',
+        '!', 'rtph264depay',
         '!', 'autovideosink ', 'sync=false', 'max-buffers=1', 'drop=true'
     ]
 
