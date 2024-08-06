@@ -6,6 +6,7 @@ import threading
 import time
 import logging
 import dotenv
+import json
 
 dotenv.load_dotenv('/app/.env')
 
@@ -32,7 +33,8 @@ kinesis_client = boto3.client('kinesis',
                               aws_access_key_id=aws_access_key,
                               aws_secret_access_key=aws_secret_key)
 
-logger.info(f"Logging: {kinesis_client.text}")
+logger.info(f"Logging: {kinesis_client.json()}")
+
 
 def send_frame_to_kinesis(frame_data):
     try:
