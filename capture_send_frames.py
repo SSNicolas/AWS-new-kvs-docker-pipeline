@@ -19,7 +19,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 logger.info(f"RTSP_URL: {camera_url}")
-logger.info(f"KVS_STREAM_NAME: {kinesis_stream_name}")
+logger.info(f"KINESIS_STREAM_NAME: {kinesis_stream_name}")
 logger.info(f"AWS_REGION: {aws_region}")
 logger.info(f"AWS_ACCESS_KEY_ID: {aws_access_key}")
 logger.info(f"AWS_SECRET_ACCESS_KEY: {aws_secret_key}")
@@ -31,7 +31,6 @@ kinesis_client = boto3.client('kinesis',
                               region_name=aws_region,
                               aws_access_key_id=aws_access_key,
                               aws_secret_access_key=aws_secret_key)
-
 
 def send_frame_to_kinesis(frame_data):
     try:
@@ -45,11 +44,10 @@ def send_frame_to_kinesis(frame_data):
     except Exception as e:
         logger.error("Failed to send frame to Kinesis: %s", e)
 
-
 def capture_frames():
     command = [
         'gst-launch-1.0',
-        'rtspsrc', f'location={camera_url}', 'latency=0', '!',
+        'rtspsrc', f'location={camera_url}', 'latency=100', '!',
         'decodebin', '!',
         'videoconvert', '!',
         'video/x-raw', '!',
@@ -57,23 +55,21 @@ def capture_frames():
         'appsink', 'sync=false', 'max-buffers=1', 'drop=true'
     ]
 
-    process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-
-    logger.info(f"Logging process: {process}")
+    process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, bufsize=1, universal_newlines=True)
 
     while True:
         stderr_line = process.stderr.readline()
         if stderr_line:
-            logger.info(f"GStreamer stderr: {stderr_line.decode('utf-8').strip()}")
+            logger.info(f"GStreamer stderr: {stderr_line.strip()}")
 
-        frame_data = process.stdout.read()
-        if frame_data:
-            logger.info(f"Received frame from GStreamer pipeline: {frame_data}")
+        stdout_line = process.stdout.readline()
+        if stdout_line:
+            logger.info(f"GStreamer stdout: {stdout_line.strip()}")
+            frame_data = stdout_line.encode('utf-8')
             send_frame_to_kinesis(frame_data)
         else:
             logger.error("No frame data received from GStreamer pipeline")
         time.sleep(1)
-
 
 if __name__ == "__main__":
     logger.info("Starting frame capture and send to Kinesis")
