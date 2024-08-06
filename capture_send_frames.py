@@ -10,7 +10,7 @@ import dotenv
 dotenv.load_dotenv('/app/.env')
 
 camera_url = os.getenv('RTSP_URL')
-kinesis_stream_name = os.getenv('KVS_STREAM_NAME')
+kinesis_stream_name = os.getenv('KINESIS_STREAM_NAME')
 aws_region = os.getenv('AWS_REGION')
 aws_access_key = os.getenv('AWS_ACCESS_KEY_ID')
 aws_secret_key = os.getenv('AWS_SECRET_ACCESS_KEY')
@@ -45,13 +45,14 @@ def send_frame_to_kinesis(frame_data):
     except Exception as e:
         logger.error("Failed to send frame to Kinesis: %s", e)
 
+
 def capture_frames():
     command = [
         'gst-launch-1.0',
         'rtspsrc', f'location={camera_url}', 'latency=0', '!',
         'decodebin', '!',
         'videoconvert', '!',
-        'video/x-raw,framerate=1/1', '!',  # 1 frame per second
+        'video/x-raw', '!',
         'jpegenc', '!',
         'appsink', 'sync=false', 'max-buffers=1', 'drop=true'
     ]
@@ -59,12 +60,17 @@ def capture_frames():
     process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
     while True:
+        stderr_line = process.stderr.readline()
+        if stderr_line:
+            logger.info(f"GStreamer stderr: {stderr_line.decode('utf-8').strip()}")
+
         frame_data = process.stdout.read()
         if frame_data:
             send_frame_to_kinesis(frame_data)
         else:
             logger.error("No frame data received from GStreamer pipeline")
         time.sleep(1)
+
 
 if __name__ == "__main__":
     logger.info("Starting frame capture and send to Kinesis")

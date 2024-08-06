@@ -1,10 +1,8 @@
 FROM ubuntu:20.04
 
-# Definir variáveis de ambiente para evitar prompts interativos
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=Etc/UTC
 
-# Instalar dependências
 RUN apt-get update && apt-get install -y \
     cmake \
     libssl-dev \
@@ -34,20 +32,13 @@ RUN apt-get update && apt-get install -y \
     m4 && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Instalar boto3 e outras dependências Python
 COPY requirements.txt /tmp/requirements.txt
 RUN pip3 install --no-cache-dir -r /tmp/requirements.txt && rm /tmp/requirements.txt
 
-# Copiar o arquivo .env para o contêiner
 COPY .env /app/.env
-
-# Adicionar script para captura e envio de frames
 COPY capture_send_frames.py /usr/local/bin/capture_send_frames.py
 
-# Tornar o script executável
 RUN chmod +x /usr/local/bin/capture_send_frames.py
-
-# Adicionar um usuário não root
 RUN useradd -m appuser
 USER appuser
 
