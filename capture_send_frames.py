@@ -51,9 +51,7 @@ def capture_frames():
         '!', 'videoconvert',
         '!', 'h264parse',
         '!', 'rtph264depay',
-        '!', 'autovideosink ', 'sync=false', 'max-buffers=1', 'drop=true',
-        '!', 'video/x-raw,format=RGB'
-
+        '!', 'autovideosink ', 'sync=false', 'max-buffers=1', 'drop=true'
     ]
 
     process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, bufsize=1, universal_newlines=True)
