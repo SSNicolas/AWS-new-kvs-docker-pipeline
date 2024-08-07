@@ -46,12 +46,13 @@ def send_frame_to_kinesis(frame_data):
 
 def capture_frames():
     command = [
-        'gst-launch-1.0', 'rtspsrc', f'location={camera_url}', 'protocols=tcp',
-        '!', 'decodebin',
-        '!', 'videoconvert',
-        '!', 'h264parse',
-        '!', 'rtph264depay',
-        '!', 'autovideosink ', 'sync=false', 'max-buffers=1', 'drop=true'
+        # 'gst-launch-1.0', 'rtspsrc', f'location={camera_url}', 'protocols=tcp',
+        # '!', 'decodebin',
+        # '!', 'videoconvert',
+        # '!', 'h264parse',
+        # '!', 'rtph264depay',
+        # '!', 'autovideosink ', 'sync=false', 'max-buffers=1', 'drop=true'
+        'gst-launch-1.0', 'videotestsrc', '!', 'videoconvert', '!' 'autovideosink'
     ]
 
     process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, preexec_fn=os.setsid)
