@@ -44,6 +44,7 @@ def capture_frames():
         '!', 'videorate',
         '!', 'video/x-raw,framerate=1/1',
         '!', 'jpegenc',
+        '!', 'ximagesink',
     ]
     try:
         while True:
