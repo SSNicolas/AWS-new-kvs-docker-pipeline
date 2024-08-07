@@ -43,7 +43,6 @@ def capture_frames():
         '!', 'videoconvert',
         '!', 'videorate',
         '!', 'video/x-raw,framerate=1/1',
-        '!', 'jpegenc',
         '!', 'ximagesink',
     ]
     try:
