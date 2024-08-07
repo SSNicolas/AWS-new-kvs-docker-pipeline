@@ -52,7 +52,6 @@ def capture_frames():
         '!', 'h264parse',
         '!', 'avdec_h264',
         '!', 'videoconvert',
-        '!', 'video/x-raw', 'width=640', 'height=480', 'framerate=1/2',
         '!', 'ximagesink',
     ]
 
