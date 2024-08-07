@@ -32,17 +32,6 @@ kinesis_client = boto3.client('kinesis',
                               aws_access_key_id=aws_access_key,
                               aws_secret_access_key=aws_secret_key)
 
-def send_frame_to_kinesis(frame_data):
-    try:
-        frame_base64 = base64.b64encode(frame_data).decode('utf-8')
-        response = kinesis_client.put_record(
-            StreamName=kinesis_stream_name,
-            Data=frame_base64,
-            PartitionKey='partitionkey'
-        )
-        logger.info("Sent frame to Kinesis: %s", response)
-    except Exception as e:
-        logger.error("Failed to send frame to Kinesis: %s", e)
 
 def capture_frames():
     command = [
@@ -52,27 +41,45 @@ def capture_frames():
         '!', 'h264parse',
         '!', 'avdec_h264',
         '!', 'videoconvert',
-        '!', 'ximagesink',
+        '!', 'videorate', '!', 'video/x-raw,framerate=1/1',
+        '!', 'jpegenc',
+        '!', 'appsink', 'sync=false'
     ]
+    try:
+        while True:
+            process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, preexec_fn=os.setsid)
 
-    process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, preexec_fn=os.setsid)
+            while True:
+                frame = process.stdout.read()
+                if frame == b'' and process.poll() is not None:
+                    break
+                if frame:
+                    send_frame_to_kinesis(frame)
 
-    while True:
-        stderr_line = process.stderr.readline()
-        if stderr_line:
-            logger.info(f"GStreamer stderr: {stderr_line.strip()}")
+            stderr = process.stderr.read().decode('utf-8')
+            if stderr:
+                logger.error(f"GStreamer stderr: {stderr.strip()}")
 
-        stdout_line = process.stdout.readline()
-        if stdout_line:
-            logger.info(f"GStreamer stdout: {stdout_line.strip()}")
-            frame_data = stdout_line.encode('utf-8')
-            send_frame_to_kinesis(frame_data)
-        else:
-            logger.error("No frame data received from GStreamer pipeline")
-        time.sleep(1)
+            process.wait()
+            logging.info("GStreamer pipeline stopped. Restarting...")
+
+    except Exception as e:
+        logging.error(f"An error occurred: {str(e)}")
+
+
+def send_frame_to_kinesis(frame_data):
+    try:
+        # frame_base64 = base64.b64encode(frame_data).decode('utf-8')
+        response = kinesis_client.put_record(
+            StreamName=kinesis_stream_name,
+            Data=frame_data,
+            PartitionKey='partitionkey'
+        )
+        logger.info("Sent frame to Kinesis: %s", response)
+    except Exception as e:
+        logger.error("Failed to send frame to Kinesis: %s", e)
+
 
 if __name__ == "__main__":
     logger.info("Starting frame capture and send to Kinesis")
-    capture_thread = threading.Thread(target=capture_frames)
-    capture_thread.start()
-    capture_thread.join()
+    capture_frames()
