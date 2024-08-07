@@ -41,9 +41,9 @@ def capture_frames():
         '!', 'h264parse',
         '!', 'avdec_h264',
         '!', 'videoconvert',
-        '!', 'videorate', '!', 'video/x-raw,framerate=1/1',
+        '!', 'videorate',
+        '!', 'video/x-raw,framerate=1/1',
         '!', 'jpegenc',
-        '!', 'appsink', 'sync=false'
     ]
     try:
         while True:
