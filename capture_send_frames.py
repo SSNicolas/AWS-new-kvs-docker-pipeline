@@ -1,9 +1,6 @@
 import os
 import boto3
-import base64
 import subprocess
-import threading
-import time
 import logging
 import dotenv
 
@@ -54,9 +51,7 @@ def capture_frames():
         '!', 'videoconvert',
         '!', 'x264enc',
         '!', 'video/x-h264,stream-format=avc,alignment=au',
-        '!', 'kvssink', f'stream-name={kvs_stream_name}', f'aws-region={aws_region}', f'aws-endpoint={endpoint}'
-
-
+        '!', 'kvssink', f'stream-name={kvs_stream_name}', f'aws-region={aws_region}'
     ]
     try:
         while True:
@@ -76,20 +71,6 @@ def capture_frames():
 
     except Exception as e:
         logging.error(f"An error occurred: {str(e)}")
-
-
-def send_frame_to_kinesis(frame_data):
-    try:
-        # frame_base64 = base64.b64encode(frame_data).decode('utf-8')
-        response = kvs_client.put_record(
-            StreamName=kvs_stream_name,
-            Data=frame_data,
-            PartitionKey='partitionkey'
-        )
-        logger.info("Sent frame to Kinesis: %s", response)
-    except Exception as e:
-        logger.error("Failed to send frame to Kinesis: %s", e)
-
 
 if __name__ == "__main__":
     logger.info("Starting frame capture and send to Kinesis")
