@@ -29,8 +29,26 @@ RUN apt-get update && apt-get install -y \
     python3 \
     python3-pip \
     pkg-config \
-    m4 && \
+    m4 \
+    liblog4cplus-dev \
+    libgstreamer-plugins-base1.0-dev \
+    libgstreamer-plugins-bad1.0-dev \
+    libgstreamer1.0-dev \
+    libssl-dev \
+    libcurl4-openssl-dev \
+    libjsoncpp-dev \
+    libasio-dev \
+    libgl1-mesa-dev \
     apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Clone and build Kinesis Video Streams Producer SDK
+RUN git clone https://github.com/awslabs/amazon-kinesis-video-streams-producer-sdk-cpp.git /opt/amazon-kinesis-video-streams-producer-sdk-cpp && \
+    cd /opt/amazon-kinesis-video-streams-producer-sdk-cpp && \
+    mkdir -p build && \
+    cd build && \
+    cmake .. && \
+    make && \
+    make install
 
 COPY requirements.txt /tmp/requirements.txt
 RUN pip3 install --no-cache-dir -r /tmp/requirements.txt && rm /tmp/requirements.txt
