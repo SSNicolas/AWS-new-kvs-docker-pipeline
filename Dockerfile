@@ -31,11 +31,6 @@ RUN apt-get update && apt-get install -y \
     pkg-config \
     m4 \
     liblog4cplus-dev \
-    libgstreamer-plugins-base1.0-dev \
-    libgstreamer-plugins-bad1.0-dev \
-    libgstreamer1.0-dev \
-    libssl-dev \
-    libcurl4-openssl-dev \
     libjsoncpp-dev \
     libasio-dev \
     libgl1-mesa-dev \
@@ -44,11 +39,16 @@ RUN apt-get update && apt-get install -y \
 # Clone and build Kinesis Video Streams Producer SDK
 RUN git clone https://github.com/awslabs/amazon-kinesis-video-streams-producer-sdk-cpp.git /opt/amazon-kinesis-video-streams-producer-sdk-cpp && \
     cd /opt/amazon-kinesis-video-streams-producer-sdk-cpp && \
+    git checkout release && \
     mkdir -p build && \
     cd build && \
-    cmake .. && \
+    cmake .. -DBUILD_GSTREAMER_PLUGIN=ON && \
     make && \
     make install
+
+# Ensure GStreamer can find the kvssink plugin
+RUN export GST_PLUGIN_PATH=/opt/amazon-kinesis-video-streams-producer-sdk-cpp/build && \
+    export LD_LIBRARY_PATH=/opt/amazon-kinesis-video-streams-producer-sdk-cpp/open-source/local/lib
 
 COPY requirements.txt /tmp/requirements.txt
 RUN pip3 install --no-cache-dir -r /tmp/requirements.txt && rm /tmp/requirements.txt
@@ -57,6 +57,7 @@ COPY .env /app/.env
 COPY capture_send_frames.py /usr/local/bin/capture_send_frames.py
 
 RUN chmod +x /usr/local/bin/capture_send_frames.py
+
 RUN useradd -m appuser
 USER appuser
 
