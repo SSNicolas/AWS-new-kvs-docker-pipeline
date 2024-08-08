@@ -28,6 +28,7 @@ RUN apt-get update && apt-get install -y \
     tzdata \
     python3 \
     python3-pip \
+    ca-certificates \
     pkg-config \
     m4 \
     liblog4cplus-dev \
@@ -36,15 +37,14 @@ RUN apt-get update && apt-get install -y \
     libgl1-mesa-dev \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Clone and build Kinesis Video Streams Producer SDK
-RUN git clone https://github.com/awslabs/amazon-kinesis-video-streams-producer-sdk-cpp.git /opt/amazon-kinesis-video-streams-producer-sdk-cpp && \
-    cd /opt/amazon-kinesis-video-streams-producer-sdk-cpp && \
-    mkdir -p build && \
-    cd build && \
-    cmake .. -DBUILD_GSTREAMER_PLUGIN=ON && \
-    make && \
-    make install && \
-    rm -rf /opt/amazon-kinesis-video-streams-producer-sdk-cpp
+# Clonar e construir o SDK do Kinesis Video Streams Producer
+RUN git clone https://github.com/awslabs/amazon-kinesis-video-streams-producer-sdk-cpp.git /opt/amazon-kinesis-video-streams-producer-sdk-cpp \
+    && cd /opt/amazon-kinesis-video-streams-producer-sdk-cpp \
+    && mkdir -p kinesis-video-native-build \
+    && cd kinesis-video-native-build \
+    && cmake .. -DBUILD_GSTREAMER_PLUGIN=ON \
+    && make \
+    && make install
 
 # Ensure GStreamer can find the kvssink plugin
 RUN export GST_PLUGIN_PATH=/opt/amazon-kinesis-video-streams-producer-sdk-cpp/build && \
