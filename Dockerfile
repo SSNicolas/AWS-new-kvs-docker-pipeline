@@ -58,6 +58,8 @@ COPY capture_send_frames.py /usr/local/bin/capture_send_frames.py
 
 RUN chmod +x /usr/local/bin/capture_send_frames.py
 
+ENV GST_PLUGIN_PATH=/opt/amazon-kinesis-video-streams-producer-sdk-cpp/kinesis-video-native-build
+
 RUN useradd -m appuser
 USER appuser
 
