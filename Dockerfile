@@ -39,7 +39,7 @@ RUN apt-get update && apt-get install -y \
     libjsoncpp-dev \
     libasio-dev \
     libgl1-mesa-dev \
-    apt-get clean && rm -rf /var/lib/apt/lists/*
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Clone and build Kinesis Video Streams Producer SDK
 RUN git clone https://github.com/awslabs/amazon-kinesis-video-streams-producer-sdk-cpp.git /opt/amazon-kinesis-video-streams-producer-sdk-cpp && \
