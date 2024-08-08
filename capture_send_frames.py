@@ -32,6 +32,8 @@ kvs_client = boto3.client('kinesisvideo',
                               aws_access_key_id=aws_access_key,
                               aws_secret_access_key=aws_secret_key)
 
+logger.info(f"Client created.")
+
 
 def capture_frames():
     # Obter o endpoint de vídeo do Kinesis
@@ -39,7 +41,11 @@ def capture_frames():
         StreamName=kvs_stream_name,
         APIName='PUT_MEDIA'
     )
+    logger.info(f"Using client.")
+
     endpoint = response['DataEndpoint']
+
+    logger.info(f"endpoint done")
 
     command = [
         'gst-launch-1.0', 'rtspsrc', f'location={camera_url}', 'latency=10',
@@ -55,6 +61,8 @@ def capture_frames():
     try:
         while True:
             process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+            logger.info(f"Process command.")
 
             while True:
                 stderr = process.stderr.read().decode('utf-8')
