@@ -55,6 +55,7 @@ RUN pip3 install --no-cache-dir -r /tmp/requirements.txt && rm /tmp/requirements
 
 COPY .env /app/.env
 COPY capture_send_frames.py /usr/local/bin/capture_send_frames.py
+COPY kvs_log_configuration.properties /app/kvs_log_configuration.properties
 
 RUN chmod +x /usr/local/bin/capture_send_frames.py
 
