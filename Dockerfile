@@ -63,4 +63,7 @@ ENV GST_PLUGIN_PATH=/opt/amazon-kinesis-video-streams-producer-sdk-cpp/kinesis-v
 RUN useradd -m appuser
 USER appuser
 
+# Configurar a variável de ambiente para o log4cplus
+ENV LOG4CPLUS_CONFIGURATION=/usr/local/bin/kvs_log_configuration
+
 ENTRYPOINT ["python3", "/usr/local/bin/capture_send_frames.py"]
