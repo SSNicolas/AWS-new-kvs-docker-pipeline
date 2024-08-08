@@ -3,6 +3,7 @@ import boto3
 import subprocess
 import logging
 import dotenv
+import time
 
 dotenv.load_dotenv('/app/.env')
 
@@ -41,8 +42,7 @@ def capture_frames():
     logger.info(f"Using client.")
 
     endpoint = response['DataEndpoint']
-
-    logger.info(f"endpoint done")
+    logger.info(f"endpoint: {endpoint}")
 
     command = [
         'gst-launch-1.0', 'rtspsrc', f'location={camera_url}', 'latency=10',
@@ -53,14 +53,14 @@ def capture_frames():
         '!', 'video/x-h264,stream-format=avc,alignment=au',
         '!', 'kvssink', f'stream-name={kvs_stream_name}', f'aws-region={aws_region}'
     ]
-    try:
-        while True:
+    while True:
+        try:
             process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
             logger.info(f"Process command.")
 
             while True:
-                stderr = process.stderr.read().decode('utf-8')
+                stderr = process.stderr.readline()
                 if stderr:
                     logger.error(f"GStreamer stderr: {stderr.strip()}")
                 if process.poll() is not None:
@@ -69,8 +69,9 @@ def capture_frames():
             process.wait()
             logging.info("GStreamer pipeline stopped. Restarting...")
 
-    except Exception as e:
-        logging.error(f"An error occurred: {str(e)}")
+        except Exception as e:
+            logging.error(f"An error occurred: {str(e)}")
+            time.sleep(2)
 
 if __name__ == "__main__":
     logger.info("Starting frame capture and send to Kinesis")
