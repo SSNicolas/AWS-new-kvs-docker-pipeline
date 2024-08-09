@@ -45,13 +45,14 @@ def capture_frames():
     logger.info(f"endpoint: {endpoint}")
 
     command = [
-        'gst-launch-1.0', 'rtspsrc', f'location={camera_url}', 'latency=10',
+        'gst-launch-1.0', 'rtspsrc', f'location={camera_url}', 'short-header=TRUE',
+        '!', 'rtph264depay',
         '!', 'decodebin',
-        '!', 'videorate', '!', 'video/x-raw,framerate=1/1',
+        # '!', 'videorate', '!', 'video/x-raw,framerate=1/1',
         '!', 'videoconvert',
         '!', 'x264enc',
         '!', 'video/x-h264,stream-format=avc,alignment=au',
-        '!', 'kvssink', f'stream-name={kvs_stream_name}', f'aws-region={aws_region}'
+        '!', 'kvssink', 'storage-size=512', f'stream-name={kvs_stream_name}', f'aws-region={aws_region}'
     ]
     while True:
         try:
@@ -60,9 +61,9 @@ def capture_frames():
             logger.info(f"Process command.")
 
             while True:
-                stderr = process.stderr.readline()
-                if stderr:
-                    logger.error(f"GStreamer stderr: {stderr.strip()}")
+                stderr_line = process.stderr.readline()
+                if stderr_line:
+                    logger.error(f"GStreamer stderr: {stderr_line.strip()}")
                 if process.poll() is not None:
                     break
 
