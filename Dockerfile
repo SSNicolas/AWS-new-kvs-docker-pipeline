@@ -40,7 +40,7 @@ RUN apt-get update && apt-get install -y \
 RUN git clone https://github.com/awslabs/amazon-kinesis-video-streams-producer-sdk-cpp.git /opt/amazon-kinesis-video-streams-producer-sdk-cpp \
     && cd /opt/amazon-kinesis-video-streams-producer-sdk-cpp \
     && mkdir -p log \
-    && touch -p ./log/kvs.log
+    && touch -p ./log/kvs.log \
     && mkdir -p build \
     && cd build \
     && cmake .. -DBUILD_GSTREAMER_PLUGIN=ON \
