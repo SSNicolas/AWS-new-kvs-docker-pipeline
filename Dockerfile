@@ -39,6 +39,8 @@ RUN apt-get update && apt-get install -y \
 # Clonar e construir o SDK do Kinesis Video Streams Producer
 RUN git clone https://github.com/awslabs/amazon-kinesis-video-streams-producer-sdk-cpp.git /opt/amazon-kinesis-video-streams-producer-sdk-cpp \
     && cd /opt/amazon-kinesis-video-streams-producer-sdk-cpp \
+    && mkdir -p log \
+    && touch -p ./log/kvs.log
     && mkdir -p build \
     && cd build \
     && cmake .. -DBUILD_GSTREAMER_PLUGIN=ON \
@@ -47,8 +49,6 @@ RUN git clone https://github.com/awslabs/amazon-kinesis-video-streams-producer-s
 
 # Ensure GStreamer can find the kvssink plugin
 ENV GST_PLUGIN_PATH=/opt/amazon-kinesis-video-streams-producer-sdk-cpp/build
-
-RUN mkdir -p ./log
 
 # Copiar o arquivo de configuração de log
 COPY kvs_log_configuration.properties ./
