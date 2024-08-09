@@ -51,7 +51,7 @@ RUN git clone https://github.com/awslabs/amazon-kinesis-video-streams-producer-s
 ENV GST_PLUGIN_PATH=/opt/amazon-kinesis-video-streams-producer-sdk-cpp/build
 
 # Copiar o arquivo de configuração de log
-COPY kvs_log_configuration.properties ./
+COPY kvs_log_configuration.properties ../
 
 COPY requirements.txt /tmp/requirements.txt
 RUN pip3 install --no-cache-dir -r /tmp/requirements.txt && rm /tmp/requirements.txt
