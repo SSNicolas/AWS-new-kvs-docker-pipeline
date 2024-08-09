@@ -48,6 +48,7 @@ def capture_frames():
         'gst-launch-1.0', 'rtspsrc', f'location={camera_url}',
         '!', 'rtph264depay',
         '!', 'decodebin',
+        '!', 'videorate', '!', 'video/x-raw,framerate=1/1',
         '!', 'videoconvert',
         '!', 'x264enc',
         '!', 'video/x-h264,stream-format=avc,alignment=au',
