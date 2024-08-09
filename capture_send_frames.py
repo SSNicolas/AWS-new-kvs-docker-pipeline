@@ -45,7 +45,7 @@ def capture_frames():
     logger.info(f"endpoint: {endpoint}")
 
     command = [
-        'gst-launch-1.0', 'rtspsrc', f'location={camera_url}',
+        'gst-launch-1.0', 'rtspsrc', f'location={camera_url}', 'latency=5',
         '!', 'rtph264depay',
         '!', 'decodebin',
         '!', 'videorate', '!', 'video/x-raw,framerate=1/1',
