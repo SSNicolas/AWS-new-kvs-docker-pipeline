@@ -48,12 +48,14 @@ RUN git clone https://github.com/awslabs/amazon-kinesis-video-streams-producer-s
 # Ensure GStreamer can find the kvssink plugin
 ENV GST_PLUGIN_PATH=/opt/amazon-kinesis-video-streams-producer-sdk-cpp/kinesis-video-native-build
 
+# Copiar o arquivo de configuração de log
+COPY kvs_log_configuration /opt/amazon-kinesis-video-streams-producer-sdk-cpp/kinesis-video-native-build/kvs_log_configuration
+
 COPY requirements.txt /tmp/requirements.txt
 RUN pip3 install --no-cache-dir -r /tmp/requirements.txt && rm /tmp/requirements.txt
 
 COPY .env /app/.env
 COPY capture_send_frames.py /usr/local/bin/capture_send_frames.py
-COPY kvs_log_configuration.properties /app/kvs_log_configuration.properties
 
 RUN chmod +x /usr/local/bin/capture_send_frames.py
 
@@ -61,6 +63,6 @@ RUN useradd -m appuser
 USER appuser
 
 # Configurar a variável de ambiente para o log4cplus
-ENV LOG4CPLUS_CONFIGURATION=/app/kvs_log_configuration.properties
+ENV LOG4CPLUS_CONFIGURATION=/opt/amazon-kinesis-video-streams-producer-sdk-cpp/kinesis-video-native-build/kvs_log_configuration
 
 ENTRYPOINT ["python3", "/usr/local/bin/capture_send_frames.py"]
