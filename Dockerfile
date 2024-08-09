@@ -39,8 +39,6 @@ RUN apt-get update && apt-get install -y \
 # Clonar e construir o SDK do Kinesis Video Streams Producer
 RUN git clone https://github.com/awslabs/amazon-kinesis-video-streams-producer-sdk-cpp.git /opt/amazon-kinesis-video-streams-producer-sdk-cpp \
     && cd /opt/amazon-kinesis-video-streams-producer-sdk-cpp \
-    && mkdir -p log \
-    && touch ./log/kvs.log \
     && mkdir -p build \
     && cd build \
     && cmake .. -DBUILD_GSTREAMER_PLUGIN=ON \
@@ -67,4 +65,4 @@ USER appuser
 # Configurar a variável de ambiente para o log4cplus
 ENV LOG4CPLUS_CONFIGURATION=../kvs_log_configuration
 
-# ENTRYPOINT ["python3", "/usr/local/bin/capture_send_frames.py"]
+ENTRYPOINT ["python3", "/usr/local/bin/capture_send_frames.py"]
