@@ -67,4 +67,4 @@ USER appuser
 # Configurar a variável de ambiente para o log4cplus
 ENV LOG4CPLUS_CONFIGURATION=../kvs_log_configuration
 
-ENTRYPOINT ["python3", "/usr/local/bin/capture_send_frames.py"]
+# ENTRYPOINT ["python3", "/usr/local/bin/capture_send_frames.py"]
