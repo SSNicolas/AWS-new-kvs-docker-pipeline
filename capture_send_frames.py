@@ -52,7 +52,7 @@ def capture_frames():
         '!', 'videoconvert',
         '!', 'x264enc',
         '!', 'video/x-h264,stream-format=avc,alignment=au',
-        '!', 'kvssink', 'storage-size=512', f'stream-name={kvs_stream_name}', f'aws-region={aws_region}'
+        '!', 'kvssink', 'storage-size=512', f'stream-name={kvs_stream_name}', f'aws-region={aws_region}', f'access-key={aws_access_key}', f'secret-key={aws_secret_key}'
     ]
     while True:
         try:
