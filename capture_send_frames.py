@@ -55,7 +55,8 @@ def capture_frames():
         '!', 'x264enc', 'tune=zerolatency', 'speed-preset=ultrafast', 'bitrate=5000',
         # Ajuste a taxa de bits conforme necessário
         '!', 'video/x-h264,stream-format=avc,alignment=au',
-        '!', 'kvssink', f'stream-name={kvs_stream_name}', f'aws-region={aws_region}', f'access-key={aws_access_key}', f'secret-key={aws_secret_key}', 'sync=false',
+        '!', 'kvssink', f'stream-name={kvs_stream_name}', f'aws-region={aws_region}', f'access-key={aws_access_key}',
+        f'secret-key={aws_secret_key}', 'sync=false'
     ]
 
     while True:
