@@ -53,7 +53,6 @@ def capture_frames():
         '!', 'queue', 'leaky=downstream', 'max-size-buffers=1',
         '!', 'videoscale',  # Adiciona escalonamento de vídeo para ajuste de resolução
         '!', 'video/x-raw,width=640,height=360',  # Define a resolução para 640x360
-        '!', 'videoconvert',
         '!', 'kvssink', f'stream-name={kvs_stream_name}', f'aws-region={aws_region}', f'access-key={aws_access_key}',
         f'secret-key={aws_secret_key}'
     ]
