@@ -50,14 +50,8 @@ def capture_frames():
         '!', 'rtph264depay',
         '!', 'h264parse',
         '!', 'avdec_h264',
-
-        '!', 'decodebin',
-        '!', 'videorate', 'drop-only=true', 'max-rate=1',  # Processar apenas 1 frame por segundo
-        '!', 'queue', 'leaky=downstream', 'max-size-buffers=1',
         '!', 'videoconvert',
-        '!', 'x264enc', 'tune=zerolatency', 'speed-preset=ultrafast', 'bitrate=5000',
-        # Ajuste a taxa de bits conforme necessário
-        'video/x-raw,format=RGB',
+        '!', 'video/x-raw,format=RGB',
         '!', 'kvssink', f'stream-name={kvs_stream_name}', f'aws-region={aws_region}', f'access-key={aws_access_key}',
         f'secret-key={aws_secret_key}'
     ]
