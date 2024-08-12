@@ -45,11 +45,9 @@ def capture_frames():
     logger.info(f"endpoint: {endpoint}")
 
     command = [
-        'gst-launch-1.0', '--gst-debug-level=3'
-        'rtspsrc', f'location={camera_url}', 'latency=0', 'protocols=tcp',
+        'gst-launch-1.0',
+        'rtspsrc', f'location={camera_url}', 'latency=0', 'buffer-mode=auto',
         '!', 'rtph264depay',
-        '!', 'h264parse',
-        '!', 'avdec_h264',
         '!', 'decodebin',
         '!', 'videorate', 'drop-only=true', 'max-rate=1',  # Processar apenas 1 frame por segundo
         '!', 'queue', 'leaky=downstream', 'max-size-buffers=1',
