@@ -45,10 +45,13 @@ def capture_frames():
     logger.info(f"endpoint: {endpoint}")
 
     command = [
-        'gst-launch-1.0', 'rtspsrc', f'location={camera_url}', 'protocols=tcp', '!', 'rtph264depay', '!', 'h264parse', '!',
-        'avdec_h264', '!', 'videoconvert', '!', 'video/x-raw,format=RGB'
+        'gst-launch-1.0',
+        'rtspsrc', f'location={camera_url}', 'latency=0',
+        '!', 'rtph264depay',
+        '!', 'h264parse',
+        '!', 'kvssink', f'stream-name={kvs_stream_name}', f'aws-region={aws_region}', f'access-key={aws_access_key}',
+        f'secret-key={aws_secret_key}'
     ]
-
     while True:
         try:
             process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
