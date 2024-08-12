@@ -45,14 +45,8 @@ def capture_frames():
     logger.info(f"endpoint: {endpoint}")
 
     command = [
-        'gst-launch-1.0',
-        'rtspsrc', f'location={camera_url}', 'latency=0', 'buffer-mode=auto',
-        '!', 'rtph264depay',
-        '!', 'decodebin',
-        '!', 'videorate', 'drop-only=true', 'max-rate=1',  # Processar apenas 1 frame por segundo
-        '!', 'queue', 'leaky=downstream', 'max-size-buffers=1',
-        '!', 'kvssink', f'stream-name={kvs_stream_name}', f'aws-region={aws_region}', f'access-key={aws_access_key}',
-        f'secret-key={aws_secret_key}'
+        'gst-launch-1.0', 'rtspsrc', f'location={camera_url}', 'protocols=tcp', '!', 'rtph264depay', '!', 'h264parse', '!',
+        'avdec_h264', '!', 'videoconvert', '!', 'video/x-raw,format=RGB'
     ]
 
     while True:
