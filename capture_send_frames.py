@@ -51,6 +51,8 @@ def capture_frames():
         '!', 'h264parse',
         '!', 'avdec_h264',
         '!', 'videoconvert',
+        '!', 'x264enc',
+        '!', 'h264parse',
         '!', 'kvssink',
         f'stream-name={kvs_stream_name}',
         f'aws-region={aws_region}',
