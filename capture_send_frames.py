@@ -45,11 +45,11 @@ def capture_frames():
     logger.info(f"endpoint: {endpoint}")
 
     command = [
-        'GST_DEBUG=3',
         'gst-launch-1.0',
         'rtspsrc', f'location={camera_url}', 'latency=0',
         '!', 'rtph264depay',
         '!', 'h264parse',
+        '!', 'videoconvert',
         '!', 'kvssink',
         f'stream-name={kvs_stream_name}',
         f'aws-region={aws_region}',
