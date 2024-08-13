@@ -48,7 +48,6 @@ def capture_frames():
         'rtspsrc', f'location={camera_url}', 'latency=200',
         '!', 'rtph264depay',
         '!', 'h264parse',
-        '!', 'h264parse',
         '!', 'kvssink',
         f'stream-name={kvs_stream_name}',
         f'aws-region={aws_region}',
