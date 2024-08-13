@@ -45,7 +45,7 @@ def capture_frames():
 
     command = [
         'gst-launch-1.0',
-        'rtspsrc', f'location={camera_url}', 'latency=0',
+        'rtspsrc', f'location={camera_url}', 'latency=200',
         '!', 'rtph264depay',
         '!', 'h264parse',
         '!', 'avdec_h264',
