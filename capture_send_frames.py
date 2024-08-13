@@ -3,7 +3,6 @@ import boto3
 import subprocess
 import logging
 import dotenv
-import time
 
 dotenv.load_dotenv('/app/.env')
 
@@ -59,25 +58,26 @@ def capture_frames():
         f'access-key={aws_access_key}',
         f'secret-key={aws_secret_key}'
     ]
-    while True:
-        try:
-            process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
-            logger.info(f"Process command.")
+    try:
+        process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
-            while True:
-                stderr_line = process.stderr.readline()
-                if stderr_line:
-                    logger.error(f"GStreamer stderr: {stderr_line.strip()}")
-                if process.poll() is not None:
-                    break
-            logger.info(f"Dale")
-            process.wait()
-            logging.info("GStreamer pipeline stopped. Restarting...")
+        logger.info(f"Process command.")
 
-        except Exception as e:
-            logging.error(f"An error occurred: {str(e)}")
-            # time.sleep(2)
+        while True:
+            stderr_line = process.stderr.readline()
+            if stderr_line:
+                logger.error(f"GStreamer stderr: {stderr_line.strip()}")
+            if process.poll() is not None:
+                break
+        logger.info(f"Dale")
+        process.wait()
+        logging.info("GStreamer pipeline stopped. Restarting...")
+
+    except Exception as e:
+        logging.error(f"An error occurred: {str(e)}")
+        # time.sleep(2)
+
 
 if __name__ == "__main__":
     logger.info("Starting frame capture and send to Kinesis")
