@@ -51,11 +51,14 @@ def capture_frames():
             '!', 'h264parse',
             '!', 'kvssink', f'stream-name={kvs_stream_name}', 'storage-size=512', f'aws-region={aws_region}', f'access-key={aws_access_key}', f'secret-key={aws_secret_key}'
         ]
-
         try:
-            subprocess.run(command, shell=True, check=True)
+            process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            logger.info(f"Process command.")
         except subprocess.CalledProcessError as e:
             print(f"Erro ao executar o pipeline GStreamer: {e}")
+            print(e.stderr.decode())  # Imprime o erro retornado pelo GStreamer
+
+
 
 
 if __name__ == "__main__":
