@@ -1,4 +1,6 @@
 import os
+import time
+
 import boto3
 import subprocess
 import logging
@@ -54,6 +56,7 @@ def capture_frames():
         try:
             process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             logger.info(f"Process command.")
+            time.sleep(2)
         except subprocess.CalledProcessError as e:
             print(f"Erro ao executar o pipeline GStreamer: {e}")
             print(e.stderr.decode())  # Imprime o erro retornado pelo GStreamer
