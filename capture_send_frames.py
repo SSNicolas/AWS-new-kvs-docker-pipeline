@@ -26,24 +26,12 @@ logger.info(f"AWS_SECRET_ACCESS_KEY: {aws_secret_key}")
 if not aws_region:
     raise ValueError("AWS_REGION environment variable is not set.")
 
-kvs_client = boto3.client('kinesisvideo',
-                              region_name=aws_region,
-                              aws_access_key_id=aws_access_key,
-                              aws_secret_access_key=aws_secret_key)
 
 logger.info(f"Client created.")
 
 
 def capture_frames():
     while True:
-        # Obter o endpoint de vídeo do Kinesis
-        response = kvs_client.get_data_endpoint(
-            StreamName=kvs_stream_name,
-            APIName='PUT_MEDIA'
-        )
-        endpoint = response['DataEndpoint']
-        logger.info(f"endpoint: {endpoint}")
-
         command = [
             'gst-launch-1.0',
             'rtspsrc', f'location={camera_url}', 'latency=0',
