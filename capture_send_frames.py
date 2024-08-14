@@ -57,19 +57,19 @@ def capture_frames():
 
             logger.info(f"Process command.")
 
-            while True:
-                stderr_line = process.stderr.readline()
-                if stderr_line:
-                    logger.error(f"GStreamer stderr: {stderr_line.strip()}")
-                if process.poll() is not None:
-                    break
-            logger.info(f"Dale")
-            process.wait()
-            logging.info("GStreamer pipeline stopped. Restarting...")
-
-        except Exception as e:
-            logging.error(f"An error occurred: {str(e)}")
-            # time.sleep(2)
+        #     while True:
+        #         stderr_line = process.stderr.readline()
+        #         if stderr_line:
+        #             logger.error(f"GStreamer stderr: {stderr_line.strip()}")
+        #         if process.poll() is not None:
+        #             break
+        #     logger.info(f"Dale")
+        #     process.wait()
+        #     logging.info("GStreamer pipeline stopped. Restarting...")
+        #
+        # except Exception as e:
+        #     logging.error(f"An error occurred: {str(e)}")
+        #     # time.sleep(2)
 
 
 if __name__ == "__main__":
