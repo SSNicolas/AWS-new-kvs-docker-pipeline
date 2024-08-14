@@ -57,11 +57,28 @@ def capture_frames():
         try:
             process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             logger.info(f"Process command.")
+
+            while True:
+                output = process.stdout.readline()
+                error = process.stderr.readline()
+
+                if output:
+                    logger.info(f"STDOUT: {output.strip()}")
+
+                if error:
+                    logger.error(f"STDERR: {error.strip()}")
+
+                # Se o processo terminar, sai do loop
+                if output == '' and process.poll() is not None:
+                    break
+
+            process.wait()
+
             time.sleep(2)
         except subprocess.CalledProcessError as e:
             print(f"Erro ao executar o pipeline GStreamer: {e}")
             print(e.stderr.decode())  # Imprime o erro retornado pelo GStreamer
-
+            time.sleep(2)
 
 
 
