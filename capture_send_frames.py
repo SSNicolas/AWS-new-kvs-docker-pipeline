@@ -54,19 +54,14 @@ def capture_frames():
             ]
 
             process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            process.wait()
             logger.info(f"Process command.")
 
         #     while True:
-        #         stderr_line = process.stderr.readline()
-        #         if stderr_line:
-        #             logger.error(f"GStreamer stderr: {stderr_line.strip()}")
-        #         if process.poll() is not None:
-        #             break
-        #     logger.info(f"Dale")
-        #     process.wait()
-        #     logging.info("GStreamer pipeline stopped. Restarting...")
-        #
+            stderr_line = process.stderr.readline()
+            if stderr_line:
+                logger.error(f"GStreamer stderr: {stderr_line.strip()}")
+            logger.info(f"Dale")
+            logging.info("GStreamer pipeline stopped. Restarting...")
 
         except Exception as e:
             logging.error(f"An error occurred: {str(e)}")
