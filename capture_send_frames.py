@@ -53,8 +53,8 @@ def capture_frames():
                 '!', 'kvssink', f'stream-name={kvs_stream_name}', 'storage-size=512', f'aws-region={aws_region}', f'access-key={aws_access_key}', f'secret-key={aws_secret_key}'
             ]
 
-            process = subprocess.run(command, shell=True, check=True)
-
+            process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            process.wait()
             logger.info(f"Process command.")
 
         #     while True:
@@ -67,6 +67,7 @@ def capture_frames():
         #     process.wait()
         #     logging.info("GStreamer pipeline stopped. Restarting...")
         #
+
         except Exception as e:
             logging.error(f"An error occurred: {str(e)}")
             # time.sleep(2)
