@@ -34,38 +34,28 @@ logger.info(f"Client created.")
 
 def capture_frames():
     while True:
+        # Obter o endpoint de vídeo do Kinesis
+        response = kvs_client.get_data_endpoint(
+            StreamName=kvs_stream_name,
+            APIName='PUT_MEDIA'
+        )
+        logger.info(f"Using client.")
+
+        endpoint = response['DataEndpoint']
+        logger.info(f"endpoint: {endpoint}")
+
+        command = [
+            'gst-launch-1.0',
+            'rtspsrc', f'location={camera_url}',
+            '!', 'rtph264depay',
+            '!', 'h264parse',
+            '!', 'kvssink', f'stream-name={kvs_stream_name}', 'storage-size=512', f'aws-region={aws_region}', f'access-key={aws_access_key}', f'secret-key={aws_secret_key}'
+        ]
+
         try:
-            # Obter o endpoint de vídeo do Kinesis
-            response = kvs_client.get_data_endpoint(
-                StreamName=kvs_stream_name,
-                APIName='PUT_MEDIA'
-            )
-            logger.info(f"Using client.")
-
-            endpoint = response['DataEndpoint']
-            logger.info(f"endpoint: {endpoint}")
-
-            command = [
-                'gst-launch-1.0',
-                'rtspsrc', f'location={camera_url}',
-                '!', 'rtph264depay',
-                '!', 'h264parse',
-                '!', 'kvssink', f'stream-name={kvs_stream_name}', 'storage-size=512', f'aws-region={aws_region}', f'access-key={aws_access_key}', f'secret-key={aws_secret_key}'
-            ]
-
-            process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            logger.info(f"Process command.")
-
-        #     while True:
-            stderr_line = process.stderr.readline()
-            if stderr_line:
-                logger.error(f"GStreamer stderr: {stderr_line.strip()}")
-            logger.info(f"Dale")
-            logging.info("GStreamer pipeline stopped. Restarting...")
-
-        except Exception as e:
-            logging.error(f"An error occurred: {str(e)}")
-            # time.sleep(2)
+            subprocess.run(command, shell=True, check=True)
+        except subprocess.CalledProcessError as e:
+            print(f"Erro ao executar o pipeline GStreamer: {e}")
 
 
 if __name__ == "__main__":
