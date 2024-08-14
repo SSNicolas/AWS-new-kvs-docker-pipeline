@@ -67,9 +67,9 @@ def capture_frames():
         #     process.wait()
         #     logging.info("GStreamer pipeline stopped. Restarting...")
         #
-        # except Exception as e:
-        #     logging.error(f"An error occurred: {str(e)}")
-        #     # time.sleep(2)
+        except Exception as e:
+            logging.error(f"An error occurred: {str(e)}")
+            # time.sleep(2)
 
 
 if __name__ == "__main__":
