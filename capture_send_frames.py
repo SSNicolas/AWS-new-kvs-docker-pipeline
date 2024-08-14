@@ -41,8 +41,6 @@ def capture_frames():
             StreamName=kvs_stream_name,
             APIName='PUT_MEDIA'
         )
-        logger.info(f"Using client.")
-
         endpoint = response['DataEndpoint']
         logger.info(f"endpoint: {endpoint}")
 
@@ -55,24 +53,8 @@ def capture_frames():
             '!', 'kvssink', f'stream-name={kvs_stream_name}', 'storage-size=512', f'aws-region={aws_region}', f'access-key={aws_access_key}', f'secret-key={aws_secret_key}'
         ]
         try:
-            process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
             logger.info(f"Process command.")
-
-            while True:
-                output = process.stdout.readline()
-                error = process.stderr.readline()
-
-                if output:
-                    logger.info(f"STDOUT: {output.strip()}")
-
-                if error:
-                    logger.error(f"STDERR: {error.strip()}")
-
-                # Se o processo terminar, sai do loop
-                if output == '' and process.poll() is not None:
-                    break
-
-            process.wait()
 
             time.sleep(2)
         except subprocess.CalledProcessError as e:
