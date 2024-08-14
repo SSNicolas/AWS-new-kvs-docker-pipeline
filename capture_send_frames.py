@@ -47,15 +47,10 @@ def capture_frames():
 
             command = [
                 'gst-launch-1.0',
-                'rtspsrc', f'location={camera_url}', 'latency=0',
+                'rtspsrc', f'location={camera_url}',
                 '!', 'rtph264depay',
                 '!', 'h264parse',
-                '!', 'queue', 'leaky=downstream',
-                '!', 'kvssink',
-                f'stream-name={kvs_stream_name}',
-                f'aws-region={aws_region}',
-                f'access-key={aws_access_key}',
-                f'secret-key={aws_secret_key}'
+                '!', 'kvssink', f'stream-name={kvs_stream_name}', 'storage-size=512', f'aws-region={aws_region}', f'access-key={aws_access_key}', f'secret-key={aws_secret_key}'
             ]
 
             process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
