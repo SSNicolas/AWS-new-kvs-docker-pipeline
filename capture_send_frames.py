@@ -37,8 +37,9 @@ def capture_frames():
             'rtspsrc', f'location={camera_url}', 'latency=0',
             '!', 'rtph264depay',
             '!', 'h264parse',
-            '!', 'videorate', 'max-rate=10',
             '!', 'queue', 'leaky=downstream', 'max-size-buffers=1', # Descarta frames mais antigos se necessário
+            '!', 'x264enc', 'tune=zerolatency', 'speed-preset=fast',  # Codificação H.264 otimizada para baixa latência
+            '!', 'video/x-h264,stream-format=byte-stream',
             '!', 'kvssink', f'stream-name={kvs_stream_name}', 'storage-size=512', f'aws-region={aws_region}', f'access-key={aws_access_key}', f'secret-key={aws_secret_key}'
         ]
         try:
