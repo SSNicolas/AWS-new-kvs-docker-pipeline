@@ -1,10 +1,11 @@
 import os
 import time
-
-import boto3
-import subprocess
 import logging
+import gi
 import dotenv
+
+gi.require_version('Gst', '1.0')
+from gi.repository import Gst, GObject
 
 dotenv.load_dotenv('/app/.env')
 
@@ -21,38 +22,51 @@ logger.info(f"RTSP_URL: {camera_url}")
 logger.info(f"KVS_STREAM_NAME: {kvs_stream_name}")
 logger.info(f"AWS_REGION: {aws_region}")
 logger.info(f"AWS_ACCESS_KEY_ID: {aws_access_key}")
-logger.info(f"AWS_SECRET_ACCESS_KEY: {aws_secret_key}")
 
 if not aws_region:
     raise ValueError("AWS_REGION environment variable is not set.")
 
-
 logger.info(f"Client created.")
+
+# Inicializando o GStreamer
+Gst.init(None)
+
+
+def on_error(bus, msg):
+    logger.error(f"Error: {msg.parse_error()}")
+
+
+def on_eos(bus, msg):
+    logger.info("End-Of-Stream reached.")
+    Gst.main_quit()
 
 
 def capture_frames():
-    while True:
-        command = [
-            'gst-launch-1.0',
-            'rtspsrc', f'location={camera_url}', 'latency=0',
-            '!', 'rtph264depay',
-            '!', 'h264parse',
-            '!', 'queue', 'leaky=downstream', 'max-size-buffers=1', # Descarta frames mais antigos se necessário
-            '!', 'x264enc', 'tune=zerolatency', 'speed-preset=fast',  # Codificação H.264 otimizada para baixa latência
-            '!', 'video/x-h264,stream-format=byte-stream',
-            '!', 'kvssink', f'stream-name={kvs_stream_name}', 'storage-size=512', f'aws-region={aws_region}', f'access-key={aws_access_key}', f'secret-key={aws_secret_key}'
-        ]
-        try:
-            subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-            logger.info(f"Process command.")
+    pipeline_str = (
+        f"rtspsrc location={camera_url} latency=0 ! "
+        "rtph264depay ! h264parse ! queue leaky=downstream ! "
+        f"kvssink stream-name={kvs_stream_name} storage-size=512 "
+        f"aws-region={aws_region} access-key={aws_access_key} secret-key={aws_secret_key}"
+    )
 
-            time.sleep(5)
-        except subprocess.CalledProcessError as e:
-            print(f"Erro ao executar o pipeline GStreamer: {e}")
-            print(e.stderr.decode())  # Imprime o erro retornado pelo GStreamer
-            time.sleep(5)
+    pipeline = Gst.parse_launch(pipeline_str)
 
+    bus = pipeline.get_bus()
+    bus.add_signal_watch()
+    bus.connect("message::error", on_error)
+    bus.connect("message::eos", on_eos)
 
+    logger.info("Starting the GStreamer pipeline.")
+    pipeline.set_state(Gst.State.PLAYING)
+
+    try:
+        loop = GObject.MainLoop()
+        loop.run()
+    except Exception as e:
+        logger.error(f"Exception in GStreamer loop: {e}")
+    finally:
+        pipeline.set_state(Gst.State.NULL)
+        logger.info("GStreamer pipeline terminated.")
 
 if __name__ == "__main__":
     logger.info("Starting frame capture and send to Kinesis")
