@@ -3,7 +3,15 @@ FROM ubuntu:20.04
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=Etc/UTC
 
+# Instalar as dependências necessárias para PyGObject e GStreamer
 RUN apt-get update && apt-get install -y \
+    libgirepository1.0-dev \
+    gcc \
+    libcairo2-dev \
+    pkg-config \
+    python3-dev \
+    gir1.2-gtk-3.0 \
+    gir1.2-gstreamer-1.0 \
     cmake \
     libssl-dev \
     libcurl4-openssl-dev \
@@ -34,12 +42,6 @@ RUN apt-get update && apt-get install -y \
     libjsoncpp-dev \
     libasio-dev \
     libgl1-mesa-dev \
-    libgirepository1.0-dev \
-    gcc \
-    libcairo2-dev \
-    pkg-config \
-    python3-dev \
-    gir1.2-gtk-4.0 \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Clonar e construir o SDK do Kinesis Video Streams Producer
@@ -59,8 +61,6 @@ COPY kvs_log_configuration ../
 
 COPY requirements.txt /tmp/requirements.txt
 RUN pip3 install --no-cache-dir -r /tmp/requirements.txt && rm /tmp/requirements.txt
-RUN pip3 install pycairo
-RUN pip3 install PyGObject
 
 COPY .env /app/.env
 COPY capture_send_frames.py /usr/local/bin/capture_send_frames.py
