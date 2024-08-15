@@ -3,8 +3,6 @@ FROM ubuntu:20.04
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=Etc/UTC
 
-RUN sudo apt install libgirepository1.0-dev gcc libcairo2-dev pkg-config python3-dev gir1.2-gtk-4.0
-
 RUN apt-get update && apt-get install -y \
     cmake \
     libssl-dev \
@@ -36,6 +34,12 @@ RUN apt-get update && apt-get install -y \
     libjsoncpp-dev \
     libasio-dev \
     libgl1-mesa-dev \
+    libgirepository1.0-dev \
+    gcc \
+    libcairo2-dev \
+    pkg-config \
+    python3-dev \
+    gir1.2-gtk-4.0 \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Clonar e construir o SDK do Kinesis Video Streams Producer
