@@ -38,7 +38,7 @@ def capture_frames():
             '!', 'rtph264depay',
             '!', 'h264parse',
             '!', 'queue', 'leaky=downstream',  # Descarta frames mais antigos se necessário
-            '!', 'kvssink', f'stream-name={kvs_stream_name}', 'storage-size=512', f'aws-region={aws_region}', f'access-key={aws_access_key}', f'secret-key={aws_secret_key}', 'sync=0'
+            '!', 'kvssink', f'stream-name={kvs_stream_name}', 'storage-size=512', f'aws-region={aws_region}', f'access-key={aws_access_key}', f'secret-key={aws_secret_key}', 'sync=false'
         ]
         try:
             subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
