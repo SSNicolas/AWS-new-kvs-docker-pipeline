@@ -3,6 +3,8 @@ FROM ubuntu:20.04
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=Etc/UTC
 
+RUN sudo apt install libgirepository1.0-dev gcc libcairo2-dev pkg-config python3-dev gir1.2-gtk-4.0
+
 RUN apt-get update && apt-get install -y \
     cmake \
     libssl-dev \
@@ -53,6 +55,8 @@ COPY kvs_log_configuration ../
 
 COPY requirements.txt /tmp/requirements.txt
 RUN pip3 install --no-cache-dir -r /tmp/requirements.txt && rm /tmp/requirements.txt
+RUN pip3 install pycairo
+RUN pip3 install PyGObject
 
 COPY .env /app/.env
 COPY capture_send_frames.py /usr/local/bin/capture_send_frames.py
