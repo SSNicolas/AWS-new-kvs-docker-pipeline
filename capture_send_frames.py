@@ -4,7 +4,7 @@ import gi
 import dotenv
 
 gi.require_version('Gst', '1.0')
-from gi.repository import Gst, GObject, GstVideo
+from gi.repository import Gst, GObject
 
 dotenv.load_dotenv('/app/.env')
 
@@ -41,47 +41,34 @@ def on_message(bus, message, loop):
         loop.quit()
 
 
-def on_handoff(identity, buffer, pad):
-    # Verificar se o frame é completamente preto
-    caps = pad.get_current_caps()
-    video_info = GstVideo.VideoInfo()
-    video_info.from_caps(caps)
-
-    map_info = buffer.map(Gst.MapFlags.READ)
-    if not map_info:
-        return
-
-    try:
-        pixel_sum = sum(map_info.data)
-        if pixel_sum == 0:
-            logger.info("Frame preto detectado e descartado.")
-            return Gst.FlowReturn.OK  # Ignore frame
-    finally:
-        buffer.unmap(map_info)
-
-    return Gst.FlowReturn.PASS
-
-
 def start_pipeline():
-    # Definição do pipeline GStreamer para pegar sempre os frames mais recentes
+    # Definição do pipeline GStreamer
     pipeline_str = (
         f"rtspsrc location={camera_url} latency=0 ! "
         "rtph264depay ! h264parse ! queue leaky=downstream ! "
         f"kvssink stream-name={kvs_stream_name} aws-region={aws_region} access-key={aws_access_key} secret-key={aws_secret_key}"
     )
 
+    logger.info(f"Pipeline GStreamer: {pipeline_str}")
+
     # Criação do pipeline
     pipeline = Gst.parse_launch(pipeline_str)
+
+    if not pipeline:
+        logger.error("Falha ao criar o pipeline GStreamer. Verifique a configuração.")
+        return
+
     bus = pipeline.get_bus()
+
+    if not bus:
+        logger.error("Falha ao obter o bus do pipeline GStreamer.")
+        return
+
     bus.add_signal_watch()
 
     # Conectar o gerenciamento de mensagens
     loop = GObject.MainLoop()
     bus.connect("message", on_message, loop)
-
-    # Conectar o sinal de handoff para ignorar frames pretos
-    identity = pipeline.get_by_name('identity0')
-    identity.connect('handoff', on_handoff)
 
     # Iniciar o pipeline
     logger.info("Iniciando o pipeline GStreamer.")
