@@ -66,8 +66,7 @@ def start_pipeline():
     # Definição do pipeline GStreamer para pegar sempre os frames mais recentes
     pipeline_str = (
         f"rtspsrc location={camera_url} latency=0 ! "
-        "rtph264depay ! h264parse ! queue leaky=downstream ! "
-        "identity signal-handoffs=true ! videorate ! "
+        "rtph264depay ! h264parse ! videorate !"
         f"kvssink stream-name={kvs_stream_name} aws-region={aws_region} access-key={aws_access_key} secret-key={aws_secret_key}"
     )
 
