@@ -42,16 +42,16 @@ def on_eos(bus, msg):
 
 
 def capture_frames():
+
     pipeline_str = (
         f"rtspsrc location={camera_url} latency=0 ! "
         "rtph264depay ! h264parse ! avdec_h264 ! "  # Decodifica o fluxo H.264 para vídeo bruto
         "videorate ! video/x-raw,framerate=1/1 ! "  # Limita a taxa de quadros para 1 FPS
-        "x264enc tune=zerolatency ! "  # Re-encoda o vídeo em H.264
         "queue leaky=downstream ! "
+        "x264enc tune=zerolatency ! "  # Re-encoda o vídeo em H.264
         f"kvssink stream-name={kvs_stream_name} storage-size=512 "
         f"aws-region={aws_region} access-key={aws_access_key} secret-key={aws_secret_key}"
     )
-
     pipeline = Gst.parse_launch(pipeline_str)
 
     bus = pipeline.get_bus()
