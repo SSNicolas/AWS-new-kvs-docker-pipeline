@@ -6,8 +6,6 @@ import dotenv
 gi.require_version('Gst', '1.0')
 from gi.repository import Gst, GObject
 
-dotenv.load_dotenv('/app/.env')
-
 # Configuração de logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -24,7 +22,8 @@ if not all([camera_url, kvs_stream_name, aws_region, aws_access_key, aws_secret_
     raise ValueError("Verifique as variáveis de ambiente obrigatórias.")
 
 logger.info(
-    f"Configurando captura do stream RTSP de {camera_url} para o KVS stream {kvs_stream_name} na região {aws_region}.")
+    f"Configurando captura do stream RTSP de {camera_url} para o KVS stream {kvs_stream_name} na região {aws_region}."
+)
 
 # Inicialização do GStreamer
 Gst.init(None)
