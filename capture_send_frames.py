@@ -31,12 +31,15 @@ logger.info(f"Client created.")
 # Inicializando o GStreamer
 Gst.init(None)
 
+
 def on_error(bus, msg):
     logger.error(f"Error: {msg.parse_error()}")
+
 
 def on_eos(bus, msg):
     logger.info("End-Of-Stream reached.")
     Gst.main_quit()
+
 
 def capture_frames():
     pipeline_str = (
@@ -64,6 +67,7 @@ def capture_frames():
     finally:
         pipeline.set_state(Gst.State.NULL)
         logger.info("GStreamer pipeline terminated.")
+
 
 if __name__ == "__main__":
     logger.info("Starting frame capture and send to Kinesis")
