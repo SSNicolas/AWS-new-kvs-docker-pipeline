@@ -6,6 +6,8 @@ import dotenv
 gi.require_version('Gst', '1.0')
 from gi.repository import Gst, GObject
 
+dotenv.load_dotenv('/app/.env')
+
 # Configuração de logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -22,8 +24,7 @@ if not all([camera_url, kvs_stream_name, aws_region, aws_access_key, aws_secret_
     raise ValueError("Verifique as variáveis de ambiente obrigatórias.")
 
 logger.info(
-    f"Configurando captura do stream RTSP de {camera_url} para o KVS stream {kvs_stream_name} na região {aws_region}."
-)
+    f"Configurando captura do stream RTSP de {camera_url} para o KVS stream {kvs_stream_name} na região {aws_region}.")
 
 # Inicialização do GStreamer
 Gst.init(None)
@@ -48,21 +49,9 @@ def start_pipeline():
         f"kvssink stream-name={kvs_stream_name} aws-region={aws_region} access-key={aws_access_key} secret-key={aws_secret_key}"
     )
 
-    logger.info(f"Pipeline GStreamer: {pipeline_str}")
-
     # Criação do pipeline
     pipeline = Gst.parse_launch(pipeline_str)
-
-    if not pipeline:
-        logger.error("Falha ao criar o pipeline GStreamer. Verifique a configuração.")
-        return
-
     bus = pipeline.get_bus()
-
-    if not bus:
-        logger.error("Falha ao obter o bus do pipeline GStreamer.")
-        return
-
     bus.add_signal_watch()
 
     # Conectar o gerenciamento de mensagens
