@@ -45,11 +45,10 @@ def start_pipeline():
     pipeline_str = (
         f"rtspsrc location={camera_url} latency=0 ! "
         "rtph264depay ! h264parse ! "
-        "x264enc tune=zerolatency bitrate=5000 speed-preset=superfast key-int-max=30 ! "  # Configuração do encoder para baixa latência
-        "video/x-h264,profile=baseline,width=1280,height=720 ! "  # Redução da resolução e manutenção do perfil H.264
+        "x264enc tune=zerolatency bitrate=5000 speed-preset=superfast ! "  # Adicionando codificação H.264 consistente
+        "video/x-h264,profile=baseline ! "  # Forçando o perfil baseline para consistência
         "queue leaky=downstream ! "
-        f"kvssink stream-name={kvs_stream_name} aws-region={aws_region} "
-        f"access-key={aws_access_key} secret-key={aws_secret_key} buffer-duration=100"
+        f"kvssink stream-name={kvs_stream_name} aws-region={aws_region} access-key={aws_access_key} secret-key={aws_secret_key}"
     )
 
     logger.info(f"Pipeline GStreamer: {pipeline_str}")
