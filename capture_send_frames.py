@@ -2,6 +2,7 @@ import os
 import time
 import logging
 import gi
+from gi.repository import GLib
 import dotenv
 
 gi.require_version('Gst', '1.0')
@@ -60,7 +61,7 @@ def capture_frames():
     pipeline.set_state(Gst.State.PLAYING)
 
     try:
-        loop = GObject.MainLoop()
+        loop = GLib.MainLoop()
         loop.run()
     except Exception as e:
         logger.error(f"Exception in GStreamer loop: {e}")
