@@ -42,6 +42,9 @@ RUN apt-get update && apt-get install -y \
     libjsoncpp-dev \
     libasio-dev \
     libgl1-mesa-dev \
+    python3-gi \
+    python3-gi-cairo \
+    gir1.2-gtk-3.0 \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Clonar e construir o SDK do Kinesis Video Streams Producer
