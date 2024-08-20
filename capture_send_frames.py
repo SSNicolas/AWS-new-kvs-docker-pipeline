@@ -42,32 +42,35 @@ def on_eos(bus, msg):
 
 
 def capture_frames():
-    pipeline_str = (
-        f"rtspsrc location={camera_url} latency=100 ! "
-        "rtph264depay ! h264parse ! queue leaky=downstream ! "
-        f"kvssink stream-name={kvs_stream_name} storage-size=512 "
-        f"aws-region={aws_region} access-key={aws_access_key} secret-key={aws_secret_key}"
-    )
+    while True:
+        try:
+            pipeline_str = (
+                f"rtspsrc location={camera_url} latency=0 ! "
+                "rtph264depay ! h264parse ! queue leaky=downstream ! "
+                f"kvssink stream-name={kvs_stream_name} storage-size=512 "
+                f"aws-region={aws_region} access-key={aws_access_key} secret-key={aws_secret_key}"
+            )
 
-    pipeline = Gst.parse_launch(pipeline_str)
+            pipeline = Gst.parse_launch(pipeline_str)
 
-    bus = pipeline.get_bus()
-    bus.add_signal_watch()
-    bus.connect("message::error", on_error)
-    bus.connect("message::eos", on_eos)
+            bus = pipeline.get_bus()
+            bus.add_signal_watch()
+            bus.connect("message::error", on_error)
+            bus.connect("message::eos", on_eos)
 
-    logger.info("Starting the GStreamer pipeline.")
-    pipeline.set_state(Gst.State.PLAYING)
+            logger.info("Starting the GStreamer pipeline.")
+            pipeline.set_state(Gst.State.PLAYING)
 
-    try:
-        loop = GObject.MainLoop()
-        loop.run()
-    except Exception as e:
-        logger.error(f"Exception in GStreamer loop: {e}")
-    finally:
-        pipeline.set_state(Gst.State.NULL)
-        logger.info("GStreamer pipeline terminated.")
+            loop = GObject.MainLoop()
+            loop.run()
+        except Exception as e:
+            logger.error(f"Exception in GStreamer loop: {e}")
+        finally:
+            pipeline.set_state(Gst.State.NULL)
+            logger.info("GStreamer pipeline terminated.")
 
+            time.sleep(5)
+            logger.info("Reconnecting...")
 
 if __name__ == "__main__":
     logger.info("Starting frame capture and send to Kinesis")
