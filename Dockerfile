@@ -57,12 +57,12 @@ RUN git clone https://github.com/awslabs/amazon-kinesis-video-streams-producer-s
 ENV GST_PLUGIN_PATH=/opt/amazon-kinesis-video-streams-producer-sdk-cpp/build
 
 # Copiar o arquivo de configuração de log
-COPY kvs_log_configuration ../
+COPY kvs_log_configuration /usr/local/bin/
 
 COPY requirements.txt /tmp/requirements.txt
 RUN pip3 install --no-cache-dir -r /tmp/requirements.txt && rm /tmp/requirements.txt
 
-COPY .env /app/.env
+COPY .env /usr/local/bin/.env
 COPY capture_send_frames.py /usr/local/bin/capture_send_frames.py
 
 RUN chmod +x /usr/local/bin/capture_send_frames.py
@@ -71,6 +71,6 @@ RUN useradd -m appuser
 USER appuser
 
 # Configurar a variável de ambiente para o log4cplus
-ENV LOG4CPLUS_CONFIGURATION=../kvs_log_configuration
+ENV LOG4CPLUS_CONFIGURATION=/usr/local/bin/kvs_log_configuration
 
 ENTRYPOINT ["python3", "/usr/local/bin/capture_send_frames.py"]
