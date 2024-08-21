@@ -45,7 +45,7 @@ def on_eos(bus, msg):
 def capture_frames():
     pipeline_str = (
         f"rtspsrc location={camera_url} latency=0 ! "
-        "rtpmp4vdepay ! mpeg4videoparse ! queue leaky=downstream ! "
+        "rtph264depay ! avdec_h264 ! videoconvert ! x264enc bitrate=500 speed-preset=ultrafast tune=zerolatency ! "
         f"kvssink stream-name={kvs_stream_name} storage-size=512 "
         f"aws-region={aws_region} access-key={aws_access_key} secret-key={aws_secret_key}"
     )
