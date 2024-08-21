@@ -44,7 +44,7 @@ def capture_frames():
     pipeline_str = (
         f"rtspsrc location={camera_url} latency=200 ! "
         "rtph264depay ! h264parse ! "
-        f"kvssink stream-name={kvs_stream_name} storage-size=512 "
+        f"kvssink stream-name={kvs_stream_name}"
         f"aws-region={aws_region} access-key={aws_access_key} secret-key={aws_secret_key}"
     )
 
