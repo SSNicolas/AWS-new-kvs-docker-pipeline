@@ -45,7 +45,7 @@ def capture_frames():
         f"rtspsrc location={camera_url} latency=200 ! "
         "rtph264depay ! h264parse ! "
         f"kvssink stream-name={kvs_stream_name} storage-size=512 "
-        f"aws-region={aws_region}"
+        f"aws-region={aws_region} access-key={aws_access_key} secret-key={aws_secret_key}"
     )
 
     pipeline = Gst.parse_launch(pipeline_str)
