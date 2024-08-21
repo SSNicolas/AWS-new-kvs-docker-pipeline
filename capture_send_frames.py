@@ -2,13 +2,9 @@ import os
 import time
 import logging
 import gi
-from gi.repository import GLib
-import dotenv
+from gi.repository import GLib, Gst, GObject
 
 gi.require_version('Gst', '1.0')
-from gi.repository import Gst, GObject
-
-dotenv.load_dotenv('/app/.env')
 
 camera_url = os.getenv('RTSP_URL')
 kvs_stream_name = os.getenv('KVS_STREAM_NAME')
@@ -32,7 +28,6 @@ logger.info(f"Client created.")
 # Inicializando o GStreamer
 Gst.init(None)
 
-
 def on_error(bus, msg):
     logger.error(f"Error: {msg.parse_error()}")
 
@@ -44,8 +39,8 @@ def on_eos(bus, msg):
 
 def capture_frames():
     pipeline_str = (
-        f"rtspsrc location={camera_url} latency=200 ! "
-        "rtph264depay ! h264parse ! "
+        f"rtspsrc location={camera_url} latency=0 ! "
+        "rtph264depay ! h264parse ! queue leaky=downstream ! "
         f"kvssink stream-name={kvs_stream_name} storage-size=512 "
         f"aws-region={aws_region} access-key={aws_access_key} secret-key={aws_secret_key}"
     )
