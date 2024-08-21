@@ -2,9 +2,10 @@ import os
 import time
 import logging
 import gi
-from gi.repository import GLib, Gst, GObject
 
 gi.require_version('Gst', '1.0')
+from gi.repository import Gst, GObject
+
 
 camera_url = os.getenv('RTSP_URL')
 kvs_stream_name = os.getenv('KVS_STREAM_NAME')
@@ -40,7 +41,7 @@ def on_eos(bus, msg):
 def capture_frames():
     pipeline_str = (
         f"rtspsrc location={camera_url} latency=0 ! "
-        "rtph264depay ! h264parse !"
+        "rtph264depay ! h264parse ! queue leaky=downstream ! "
         f"kvssink stream-name={kvs_stream_name} storage-size=512 "
         f"aws-region={aws_region} access-key={aws_access_key} secret-key={aws_secret_key}"
     )
@@ -56,7 +57,7 @@ def capture_frames():
     pipeline.set_state(Gst.State.PLAYING)
 
     try:
-        loop = GLib.MainLoop()
+        loop = GObject.MainLoop()
         loop.run()
     except Exception as e:
         logger.error(f"Exception in GStreamer loop: {e}")
