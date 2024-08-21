@@ -42,10 +42,12 @@ def on_eos(bus, msg):
 
 def capture_frames():
     pipeline_str = (
-        f"rtspsrc location={camera_url} latency=0 ! "
-        "rtph264depay ! h264parse ! queue leaky=downstream ! "
+        f"rtspsrc location={camera_url} short-header=TRUE ! "
+        "rtph264depay ! "
+        "video/x-h264, format=avc,alignment=au ! "
         f"kvssink stream-name={kvs_stream_name} storage-size=512 "
-        f"aws-region={aws_region} access-key={aws_access_key} secret-key={aws_secret_key}"
+        f"access-key={aws_access_key} secret-key={aws_secret_key} "
+        f"aws-region={aws_region}"
     )
 
     pipeline = Gst.parse_launch(pipeline_str)
