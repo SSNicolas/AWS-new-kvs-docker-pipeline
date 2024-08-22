@@ -30,22 +30,14 @@ kvs_client = boto3.client('kinesisvideo',
 
 logger.info(f"Client created.")
 
-# Obter o endpoint de vídeo do Kinesis
-response = kvs_client.get_data_endpoint(
-    StreamName=kvs_stream_name,
-    APIName='PUT_MEDIA'
-)
-endpoint = response['DataEndpoint']
-logger.info(f"endpoint: {endpoint}")
-
-# Pipeline GStreamer otimizada para enviar vídeo ao KVS
+# Substituir a pipeline anterior pelo comando fornecido
 command = [
     'gst-launch-1.0',
-    'rtspsrc', f'location={camera_url}', 'latency=0',
+    'rtspsrc', f'location={camera_url}', 'short-header=TRUE',
     '!', 'rtph264depay',
-    '!', 'h264parse',
-    '!', 'x264enc', 'tune=zerolatency',  # Codificação H.264 com baixa latência
-    '!', 'kvssink', f'stream-name={kvs_stream_name}', f'aws-region={aws_region}',
+    '!', 'video/x-h264,format=avc,alignment=au',
+    '!', 'kvssink', f'stream-name={kvs_stream_name}', 'storage-size=512',
+    f'access-key={aws_access_key}', f'secret-key={aws_secret_key}', f'aws-region={aws_region}'
 ]
 
 try:
