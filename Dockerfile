@@ -42,6 +42,9 @@ RUN apt-get update && apt-get install -y \
     libjsoncpp-dev \
     libasio-dev \
     libgl1-mesa-dev \
+    python3-gi \
+    python3-gi-cairo \
+    gir1.2-gtk-3.0 \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Clonar e construir o SDK do Kinesis Video Streams Producer
@@ -62,7 +65,6 @@ COPY kvs_log_configuration ../
 COPY requirements.txt /tmp/requirements.txt
 RUN pip3 install --no-cache-dir -r /tmp/requirements.txt && rm /tmp/requirements.txt
 
-COPY .env /app/.env
 COPY capture_send_frames.py /usr/local/bin/capture_send_frames.py
 
 RUN chmod +x /usr/local/bin/capture_send_frames.py
