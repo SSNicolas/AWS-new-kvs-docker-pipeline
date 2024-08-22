@@ -49,19 +49,6 @@ try:
     # Monitorar o processo continuamente
     while True:
         output = process.stdout.readline()
-        error = process.stderr.readline()
-
-        if output:
-            logger.info(f"STDOUT: {output.strip()}")
-
-        if error:
-            logger.error(f"STDERR: {error.strip()}")
-
-        # Se o processo terminar, sair do loop
-        if process.poll() is not None:
-            break
-
-    process.wait()
 
 except Exception as e:
     logger.error(f"Erro ao executar o pipeline GStreamer: {e}")
