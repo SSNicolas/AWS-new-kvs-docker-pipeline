@@ -6,7 +6,7 @@ from botocore.exceptions import NoCredentialsError, PartialCredentialsError
 
 gi.require_version('Gst', '1.0')
 gi.require_version('GstRtsp', '1.0')
-from gi.repository import Gst
+from gi.repository import Gst, GLib
 
 # Inicialize o GStreamer
 Gst.init(None)
@@ -24,7 +24,7 @@ if not RTSP_URL or not KVS_STREAM_NAME or not AWS_REGION:
 def on_error(bus, message):
     err, debug = message.parse_error()
     print(f"Error: {err}, {debug}")
-    Gst.main_quit()
+    loop.quit()
 
 # Configura a pipeline do GStreamer
 def create_pipeline():
@@ -51,13 +51,16 @@ def main():
     # Inicie a pipeline
     pipeline.set_state(Gst.State.PLAYING)
 
-    # Main loop
+    # Loop de eventos para manter a pipeline em execução
+    global loop
+    loop = GLib.MainLoop()
     try:
-        Gst.main()
+        loop.run()
     except KeyboardInterrupt:
         print("Shutting down pipeline...")
     finally:
         pipeline.set_state(Gst.State.NULL)
+        loop.quit()
 
 if __name__ == "__main__":
     # Verifique as credenciais da AWS
