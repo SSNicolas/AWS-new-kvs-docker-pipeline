@@ -15,9 +15,11 @@ Gst.init(None)
 RTSP_URL = os.getenv("RTSP_URL")
 KVS_STREAM_NAME = os.getenv("KVS_STREAM_NAME")
 AWS_REGION = os.getenv("AWS_REGION")
+AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
 
-if not RTSP_URL or not KVS_STREAM_NAME or not AWS_REGION:
-    print("Erro: As variáveis de ambiente RTSP_URL, KVS_STREAM_NAME e AWS_REGION devem estar configuradas.")
+if not RTSP_URL or not KVS_STREAM_NAME or not AWS_REGION or not AWS_ACCESS_KEY_ID or not AWS_SECRET_ACCESS_KEY:
+    print("Erro: As variáveis de ambiente RTSP_URL, KVS_STREAM_NAME, AWS_REGION, AWS_ACCESS_KEY_ID e AWS_SECRET_ACCESS_KEY devem estar configuradas.")
     sys.exit(1)
 
 # Função de callback para lidar com mensagens de erro do GStreamer
@@ -34,7 +36,9 @@ def create_pipeline():
         h264parse ! 
         kvssink stream-name={KVS_STREAM_NAME} 
         storage-size=512 
-        aws-region={AWS_REGION}
+        aws-region={AWS_REGION} 
+        aws-access-key={AWS_ACCESS_KEY_ID} 
+        aws-secret-key={AWS_SECRET_ACCESS_KEY}
     """
     return Gst.parse_launch(pipeline_str)
 
@@ -63,8 +67,13 @@ def main():
         loop.quit()
 
 if __name__ == "__main__":
-    # Verifique as credenciais da AWS
+    # Configurando o cliente boto3 com as chaves de acesso
     try:
+        boto3.setup_default_session(
+            aws_access_key_id=AWS_ACCESS_KEY_ID,
+            aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
+            region_name=AWS_REGION
+        )
         boto3.client('sts').get_caller_identity()
     except (NoCredentialsError, PartialCredentialsError) as e:
         print(f"AWS credentials error: {e}")
