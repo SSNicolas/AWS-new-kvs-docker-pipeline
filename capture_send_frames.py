@@ -2,9 +2,6 @@ import os
 import boto3
 import subprocess
 import logging
-import dotenv
-
-dotenv.load_dotenv('/app/.env')
 
 camera_url = os.getenv('RTSP_URL')
 kvs_stream_name = os.getenv('KVS_STREAM_NAME')
@@ -43,7 +40,7 @@ command = [ # Adiciona debug para o GStreamer
 try:
     logger.info("Starting GStreamer pipeline.")
     # Iniciar o pipeline GStreamer
-    process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
     # Monitorar o processo continuamente
     while True:
