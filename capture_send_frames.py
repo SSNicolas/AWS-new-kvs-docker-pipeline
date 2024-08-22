@@ -31,8 +31,7 @@ kvs_client = boto3.client('kinesisvideo',
 logger.info(f"Client created.")
 
 # Substituir a pipeline anterior pelo comando fornecido
-command = [
-    'GST_DEBUG=3',  # Adiciona debug para o GStreamer
+command = [ # Adiciona debug para o GStreamer
     'gst-launch-1.0',
     'rtspsrc', f'location={camera_url}', 'short-header=TRUE',
     '!', 'rtph264depay',
