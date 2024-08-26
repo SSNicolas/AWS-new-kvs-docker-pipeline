@@ -44,52 +44,50 @@ def on_eos(bus, msg, loop):
     loop.quit()
 
 
-def capture_frames():
+def create_pipeline():
+
+    pipeline_str = (
+        f"rtspsrc location={camera_url} latency=200 ! "
+        "rtph264depay ! h264parse ! "
+        f"kvssink stream-name={kvs_stream_name} storage-size=512 "
+        f"aws-region={aws_region} access-key={aws_access_key} secret-key={aws_secret_key}"
+    )
+
+    return Gst.parse_launch(pipeline_str)
+
+def run_pipeline():
     while True:
+        pipeline = create_pipeline()
+        if not pipeline:
+            logger.error("Failed to create pipeline")
+            return
+
+        loop = GObject.MainLoop()
+
+        bus = pipeline.get_bus()
+        bus.add_signal_watch()
+        bus.connect("message::error", on_error, loop)
+        bus.connect("message::eos", on_eos, loop)
+
+        logger.info("Starting the GStreamer pipeline.")
+        ret = pipeline.set_state(Gst.State.PLAYING)
+        if ret == Gst.StateChangeReturn.FAILURE:
+            logger.error("Unable to set the pipeline to the playing state.")
+            pipeline.set_state(Gst.State.NULL)
+            return
+
         try:
-            pipeline_str = (
-                f"rtspsrc location={camera_url} latency=200 ! "
-                "rtph264depay ! h264parse ! "
-                f"kvssink stream-name={kvs_stream_name} storage-size=512 "
-                f"aws-region={aws_region} access-key={aws_access_key} secret-key={aws_secret_key}"
-            )
-
-            pipeline = Gst.parse_launch(pipeline_str)
-            if not pipeline:
-                logger.error("Failed to create pipeline")
-                return
-
-            loop = GObject.MainLoop()
-
-            bus = pipeline.get_bus()
-            bus.add_signal_watch()
-            bus.connect("message::error", on_error, loop)
-            bus.connect("message::eos", on_eos, loop)
-
-            logger.info("Starting the GStreamer pipeline.")
-            ret = pipeline.set_state(Gst.State.PLAYING)
-            if ret == Gst.StateChangeReturn.FAILURE:
-                logger.error("Unable to set the pipeline to the playing state.")
-                pipeline.set_state(Gst.State.NULL)
-                return
-
-            try:
-                loop.run()
-            except Exception as e:
-                logger.error(f"Exception in GStreamer loop: {e}")
-            finally:
-                pipeline.set_state(Gst.State.NULL)
-                logger.info("GStreamer pipeline terminated.")
-
-            # Tentativa de reconexão após uma breve pausa
-            logger.info("Tentando reconectar em 5 segundos...")
-            time.sleep(5)
-
+            loop.run()
         except Exception as e:
-            logger.error(f"Exception in capture_frames: {e}")
-            logger.info("Tentando reconectar em 10 segundos...")
-            time.sleep(10)
+            logger.error(f"Exception in GStreamer loop: {e}")
+        finally:
+            pipeline.set_state(Gst.State.NULL)
+            logger.info("GStreamer pipeline terminated.")
+
+        # Tentativa de reconexão após uma breve pausa
+        logger.info("Tentando reconectar em 5 segundos...")
+        time.sleep(5)
 
 if __name__ == "__main__":
     logger.info("Starting frame capture and send to Kinesis")
-    capture_frames()
+    run_pipeline()
